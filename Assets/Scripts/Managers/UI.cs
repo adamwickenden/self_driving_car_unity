@@ -12,6 +12,7 @@ public class UI : MonoBehaviour
     private GameObject canvas;
 
     private Text write;
+    private Text gen;
     private string output;
 
     // Start is called before the first frame update
@@ -20,7 +21,8 @@ public class UI : MonoBehaviour
         if (Instance == null) { Instance = this; }
         else { Destroy(gameObject); }
 
-        write = GameObject.Find("Text").GetComponent<Text>();
+        write = GameObject.Find("CarText").GetComponent<Text>();
+        gen = GameObject.Find("GenerationText").GetComponent<Text>();
     }
 
     // Update is called once per frame
@@ -30,16 +32,18 @@ public class UI : MonoBehaviour
 
         for (int i = 0; i < AgentManager.Instance.agentList.Count; i++)
         {
-            CarController car = AgentManager.Instance.agentList[i].GetComponent<CarController>();
+            CarController car = AgentManager.Instance.agentList[i];
 
-            string carStr = "Car " + i + ": ";
-            string vals = string.Join(", ", car.outputs.Select(x => x.ToString("N2")));
+            string carStr = "Car " + car.id + ": ";
+            string vals = string.Join(", ", car.inputs.Select(x => x.ToString("N2")));
             string dist = "    Dist: " + car.distance;
             string time = " Time: " + car.time.ToString("N1");
+            string fitness = " Fitness: " + (car.network.fitness);
 
-            output += carStr + vals + dist + time + System.Environment.NewLine;
+            output += carStr + vals + dist + time + fitness + System.Environment.NewLine;
         }
 
         write.text = output;
+        gen.text = "Generation: " + AgentManager.Instance.currGeneration;
     }
 }

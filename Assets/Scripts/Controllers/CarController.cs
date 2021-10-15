@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class CarController : MonoBehaviour
+public class CarController : MonoBehaviour, IComparable<CarController>
 {
     [SerializeField]
     private float maxSpeed;
@@ -20,13 +20,22 @@ public class CarController : MonoBehaviour
     [SerializeField]
     private LayerMask LocatorIgnore;
 
-    public float[] outputs = new float[4];
+    [HideInInspector]
+    public NeuralNetwork network;
+    [HideInInspector]
+    public float[] inputs = new float[4];
+    [HideInInspector]
     public int distance = 0;
+    [HideInInspector]
     public float time = 0;
     private float startTime;
 
-    private Vector3 previousPosition;
-    private float previousCheckTime = 0;
+    [HideInInspector]
+    public int id;
+    [HideInInspector]
+    public Vector3 previousPosition;
+    [HideInInspector]
+    public float previousCheckTime = 0;
     private float stopTime = 3f;
 
     private Rigidbody2D rb;
@@ -42,21 +51,26 @@ public class CarController : MonoBehaviour
     private void FixedUpdate()
     {
         // Observe surroundings
-        outputs[0] = Observe(0);
-        outputs[1] = Observe(30);
-        outputs[2] = Observe(180);
-        outputs[3] = Observe(330);
+        inputs[0] = Observe(0);
+        inputs[1] = Observe(30);
+        inputs[2] = Observe(180);
+        inputs[3] = Observe(330);
 
-        // Get input
-        float[] control = RandomControl();
+        // Get controls, given inputs to network
+        float[] control = network.FeedForward(inputs);
+
+        // Map NN outputs to controls of car
+        float h = control[0];
+        float v = (control[1] + 1f) / 2f; 
 
         // Move vehicle
-        Move(control[0], control[1]);
+        Move(h, v);
         NoCrashing();
 
         // Track time
         time = Time.time - startTime;
 
+        network.fitness = distance - time / 10f;
     }
 
     // Random control
@@ -141,6 +155,7 @@ public class CarController : MonoBehaviour
             if (dot < 0)
             {
                 this.gameObject.SetActive(false);
+                Debug.Log("Car " + id + " Backsied");
             }
             else { distance += 1; }
         }
@@ -154,9 +169,25 @@ public class CarController : MonoBehaviour
             if ((transform.position - previousPosition).magnitude < 0.1f)
             {
                 this.gameObject.SetActive(false);
+                Debug.Log("Car " + id + " Crashed");
             }
             previousPosition = transform.position;
             previousCheckTime = Time.time;
         }
+    }
+
+    // Comparison function
+    public int CompareTo(CarController other)
+    {
+        return network.CompareTo(other.network);
+    }
+
+    // Clear score and fitness
+    public void ResetFitness()
+    {
+        distance = 0;
+        time = 0;
+        startTime = Time.time;
+        network.fitness = 0;
     }
 }

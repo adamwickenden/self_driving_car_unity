@@ -94,12 +94,14 @@ MonoBehaviour:
   LocatorIgnore:
     serializedVersion: 2
     m_Bits: 1537
-  outputs:
+  layers: 04000000060000000300000002000000
+  inputs:
   - 0
   - 0
   - 0
   - 0
   distance: 0
+  time: 0
 --- !u!1 &6549371192286346096
 GameObject:
   m_ObjectHideFlags: 0
