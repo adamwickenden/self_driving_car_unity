@@ -12,8 +12,6 @@ public class NeuralNetwork : IComparable<NeuralNetwork>
     private float[][] biases;
     // Array of arrays of arrays which contain the current weights of each connection between neurons in layers
     private float[][][] weights;
-    // DON'T THINK THIS DOES ANYTHING, WE SHALL SEE
-    private int[] activations;
 
     // Value that defines the fitness (needs to be some combination of distance & time)
     public float fitness = 0;
